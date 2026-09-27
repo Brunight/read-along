@@ -16,7 +16,7 @@ interface Props {
   onRate: (rate: number) => void
 }
 
-function Icon({ d, className = 'size-5' }: { d: string; className?: string }) {
+export function Icon({ d, className = 'size-5' }: { d: string; className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={`${className} fill-current`} aria-hidden>
       <path d={d} />
@@ -24,7 +24,7 @@ function Icon({ d, className = 'size-5' }: { d: string; className?: string }) {
   )
 }
 
-const ICONS = {
+export const ICONS = {
   play: 'M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z',
   pause: 'M7 5h3.5v14H7zM13.5 5H17v14h-3.5z',
   back: 'M12 5V2L7 6l5 4V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8Z',

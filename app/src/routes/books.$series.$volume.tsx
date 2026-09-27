@@ -3,7 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { ChapterMenu } from '#/components/ChapterMenu'
 import { PageView, usePdfDocument } from '#/components/PdfViewer'
 import type { PageRect } from '#/components/PdfViewer'
-import { PlayerBar, RATES } from '#/components/PlayerBar'
+import { ICONS, Icon, PlayerBar, RATES } from '#/components/PlayerBar'
 import { WakeLockNotice, canKeepAwake } from '#/components/WakeLockNotice'
 import { boxStyle, gutterStyle, showsWord, useSettings, wordStyle } from '#/lib/settings'
 import { load, store } from '#/lib/storage'
@@ -27,6 +27,9 @@ const FIT_MAX = 800
 const ZOOMS = [0.5, 0.6, 0.75, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2]
 const DEFAULT_ZOOM = ZOOMS.indexOf(1)
 const SAVE_EVERY_MS = 10_000
+/** Floating round buttons over the page in fullscreen. */
+const focusBtn =
+  'grid size-10 place-items-center rounded-full text-zinc-300 shadow-lg shadow-black/40 ring-1 ring-white/10 backdrop-blur'
 
 /** Index of the last item with start <= t (or -1). */
 function lastStartingBefore<T extends { start: number }>(items: T[], t: number): number {
@@ -609,22 +612,33 @@ function Reader() {
         )}
         <WakeLockNotice playing={playing} />
         {fullscreen && (
-          <button
-            type="button"
-            onClick={() => setUiHidden((h) => !h)}
-            title={uiHidden ? 'Show controls' : 'Hide controls'}
-            className={`absolute right-3 bottom-3 hidden size-10 place-items-center rounded-full text-zinc-300 shadow-lg shadow-black/40 ring-1 ring-white/10 backdrop-blur pointer-coarse:grid ${
-              uiHidden ? 'bg-zinc-900/50 opacity-60' : 'bg-zinc-900/90'
-            }`}
-          >
-            <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-              {uiHidden ? (
-                <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Zm9.5 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-              ) : (
-                <path d="M3 3l18 18M10.6 5.6A9.9 9.9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-3 3.8M6.4 6.9A17.6 17.6 0 0 0 2.5 12S6 18.5 12 18.5a9.4 9.4 0 0 0 4.3-1M9.9 9.9a3 3 0 0 0 4.2 4.2" />
-              )}
-            </svg>
-          </button>
+          <div className="absolute right-3 bottom-3 hidden items-center gap-2 pointer-coarse:flex">
+            {/* With the player bar hidden, play/pause stays in reach. */}
+            {uiHidden && (
+              <button
+                type="button"
+                onClick={toggle}
+                title={playing ? 'Pause' : 'Play'}
+                className={`${focusBtn} bg-zinc-900/50 opacity-60`}
+              >
+                <Icon d={playing ? ICONS.pause : ICONS.play} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setUiHidden((h) => !h)}
+              title={uiHidden ? 'Show controls' : 'Hide controls'}
+              className={`${focusBtn} ${uiHidden ? 'bg-zinc-900/50 opacity-60' : 'bg-zinc-900/90'}`}
+            >
+              <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                {uiHidden ? (
+                  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Zm9.5 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                ) : (
+                  <path d="M3 3l18 18M10.6 5.6A9.9 9.9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-3 3.8M6.4 6.9A17.6 17.6 0 0 0 2.5 12S6 18.5 12 18.5a9.4 9.4 0 0 0 4.3-1M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                )}
+              </svg>
+            </button>
+          </div>
         )}
       </div>
 

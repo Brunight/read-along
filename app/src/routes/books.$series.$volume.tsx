@@ -215,6 +215,12 @@ function Reader() {
   // ----- auto-scroll -----
   const programmaticUntil = useRef(0)
   const scrolledOnce = useRef(false)
+  const scrollAnim = useRef(0)
+
+  const cancelScrollAnim = useCallback(() => {
+    cancelAnimationFrame(scrollAnim.current)
+    scrollAnim.current = 0
+  }, [])
 
   const scrollToSegment = useCallback(
     (p: Paragraph, seg: number, smooth: boolean) => {
@@ -224,13 +230,37 @@ function Reader() {
       if (!el || !pg) return
       const y0 = pg.top + r.y0 * pg.scale
       const y1 = pg.top + r.y1 * pg.scale
-      const target = Math.max(0, (y0 + y1) / 2 - el.clientHeight * 0.4)
-      const far = Math.abs(target - el.scrollTop) > el.clientHeight * 3
-      programmaticUntil.current = Date.now() + (smooth && !far ? 1200 : 200)
-      el.scrollTo({ top: target, behavior: smooth && !far ? 'smooth' : 'instant' })
+      const target = Math.min(
+        el.scrollHeight - el.clientHeight,
+        Math.max(0, (y0 + y1) / 2 - el.clientHeight * 0.4),
+      )
+      const from = el.scrollTop
+      const dist = target - from
+      const far = Math.abs(dist) > el.clientHeight * 3
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      cancelScrollAnim()
+      if (!smooth || far || reduceMotion || Math.abs(dist) < 1) {
+        programmaticUntil.current = Date.now() + 200
+        el.scrollTop = target
+        return
+      }
+      // Animated by hand: the browser's smooth scroll finishes short distances (the usual
+      // paragraph-to-paragraph step) in ~100 ms, which reads as a jump.
+      const duration = Math.min(900, 350 + Math.sqrt(Math.abs(dist)) * 20)
+      programmaticUntil.current = Date.now() + duration + 200
+      const start = performance.now()
+      const tick = (now: number) => {
+        const k = Math.min(1, (now - start) / duration)
+        const eased = k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2
+        el.scrollTop = from + dist * eased
+        scrollAnim.current = k < 1 ? requestAnimationFrame(tick) : 0
+      }
+      scrollAnim.current = requestAnimationFrame(tick)
     },
-    [layout],
+    [layout, cancelScrollAnim],
   )
+
+  useEffect(() => cancelScrollAnim, [cancelScrollAnim])
 
   useEffect(() => {
     if (!active || !follow || !containerWidth) return
@@ -246,23 +276,33 @@ function Reader() {
     const stop = () => {
       if (Date.now() > programmaticUntil.current) setFollow(false)
     }
+    // A running follow animation would fight the user's finger or wheel; they take over.
+    const takeOver = () => {
+      if (!scrollAnim.current) return
+      cancelScrollAnim()
+      programmaticUntil.current = 0
+    }
     const onKey = (e: KeyboardEvent) => {
       if (['PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown'].includes(e.key)) stop()
     }
     const onPointer = (e: PointerEvent) => {
       if (e.target === el) stop() // scrollbar drag
     }
+    el.addEventListener('wheel', takeOver, { passive: true })
+    el.addEventListener('touchstart', takeOver, { passive: true })
     el.addEventListener('wheel', stop, { passive: true })
     el.addEventListener('touchmove', stop, { passive: true })
     el.addEventListener('pointerdown', onPointer)
     window.addEventListener('keydown', onKey)
     return () => {
+      el.removeEventListener('wheel', takeOver)
+      el.removeEventListener('touchstart', takeOver)
       el.removeEventListener('wheel', stop)
       el.removeEventListener('touchmove', stop)
       el.removeEventListener('pointerdown', onPointer)
       window.removeEventListener('keydown', onKey)
     }
-  }, [])
+  }, [cancelScrollAnim])
 
   // ----- progress (resume) -----
   const lastSaved = useRef(-1)

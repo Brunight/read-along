@@ -1,0 +1,9 @@
+node_modules/
+.output/
+.nitro/
+.tanstack/
+.venv/
+__pycache__/
+data/
+books/
+books_old/

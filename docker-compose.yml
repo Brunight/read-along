@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    image: read-along
+    ports:
+      - "3000:3000"
+    volumes:
+      # Each book folder must contain its .sync/ (generated locally by prep/prep.py).
+      - ./books:/books:ro
+      # Reading positions (progress.json).
+      - ./data:/data
+    restart: unless-stopped

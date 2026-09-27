@@ -1,0 +1,8 @@
+books
+data
+prep
+app/node_modules
+app/.output
+app/.nitro
+app/.tanstack
+**/.DS_Store

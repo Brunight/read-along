@@ -2,6 +2,7 @@ services:
   app:
     build: .
     image: read-along
+    container_name: read-along-app
     ports:
       - "3000:3000"
     volumes:

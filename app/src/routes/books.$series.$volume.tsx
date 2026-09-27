@@ -205,10 +205,18 @@ function Reader() {
   useEffect(updateRange, [updateRange, containerWidth])
 
   // ----- current paragraph / chapter -----
+  const chapterIdx = Math.max(0, lastStartingBefore(chapters, time + 0.01))
   const activeIdx = useMemo(() => {
+    // While a chapter's title is read, before its first paragraph starts, show that paragraph
+    // rather than the end of the previous chapter.
+    const chapter = chapters[chapterIdx]
+    if (chapter?.firstParagraphId != null && time >= chapter.start) {
+      const first = paragraphs.findIndex((p) => p.id === chapter.firstParagraphId)
+      if (first >= 0 && time < paragraphs[first].start) return first
+    }
     const i = lastStartingBefore(paragraphs, time)
     return i >= 0 && time < paragraphs[i].end + 1 ? i : -1
-  }, [paragraphs, time])
+  }, [chapters, chapterIdx, paragraphs, time])
   const active: Paragraph | undefined = paragraphs[activeIdx]
   // Which page segment of the active paragraph is being read (paragraphs can span a page break).
   const activeSeg = useMemo(() => {
@@ -217,7 +225,6 @@ function Reader() {
     while (k + 1 < active.rects.length && segmentStart(active, k + 1) <= time) k++
     return k
   }, [active, time])
-  const chapterIdx = Math.max(0, lastStartingBefore(chapters, time + 0.01))
 
   // ----- auto-scroll -----
   const programmaticUntil = useRef(0)

@@ -96,3 +96,7 @@ bun --bun run dev    # reads ../books, writes ../data
 | F | Turn auto-follow on or off |
 
 The highlight can follow the **paragraph**, the **word** being spoken, or **both**; choose in Settings (the gear on the library page), where you can also pick colors and opacity. Click any paragraph to jump the audio there. If you scroll yourself, auto-follow pauses; click **Back to narration** to turn it back on. Headphone buttons and lock-screen controls work through the Media Session API.
+
+## License
+
+[MIT](LICENSE). This covers the code only; bring your own books and audiobooks.

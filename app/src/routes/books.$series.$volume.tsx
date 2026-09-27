@@ -101,6 +101,9 @@ function Reader() {
 
   const audioRef = useRef<HTMLAudioElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  // Where a follow animation started; those pages stay rendered until it ends.
+  const animFrom = useRef<number | null>(null)
   const [time, setTime] = useState(initialTime)
   const [duration, setDuration] = useState(sync.duration)
   const [playing, setPlaying] = useState(false)
@@ -186,8 +189,9 @@ function Reader() {
   const updateRange = useCallback(() => {
     const el = scrollRef.current
     if (!el || !layout.length) return
-    const lo = el.scrollTop - el.clientHeight
-    const hi = el.scrollTop + el.clientHeight * 2
+    const from = animFrom.current ?? el.scrollTop
+    const lo = Math.min(el.scrollTop, from) - el.clientHeight
+    const hi = Math.max(el.scrollTop, from) + el.clientHeight * 2
     let first = layout.findIndex((p) => p.top + p.height >= lo)
     if (first < 0) first = layout.length - 1
     let last = first
@@ -215,19 +219,29 @@ function Reader() {
   // ----- auto-scroll -----
   const programmaticUntil = useRef(0)
   const scrolledOnce = useRef(false)
-  const scrollAnim = useRef(0)
+  const scrollAnim = useRef<Animation | null>(null)
 
+  /** Stops a follow animation, keeping the page where it currently appears on screen. */
   const cancelScrollAnim = useCallback(() => {
-    cancelAnimationFrame(scrollAnim.current)
-    scrollAnim.current = 0
+    const anim = scrollAnim.current
+    if (!anim) return
+    scrollAnim.current = null
+    animFrom.current = null
+    const el = scrollRef.current
+    const content = contentRef.current
+    const offset = content ? new DOMMatrixReadOnly(getComputedStyle(content).transform).m42 : 0
+    anim.cancel()
+    if (el) el.scrollTop -= offset
   }, [])
 
   const scrollToSegment = useCallback(
     (p: Paragraph, seg: number, smooth: boolean) => {
       const el = scrollRef.current
+      const content = contentRef.current
       const r = p.rects[seg] ?? p.rects[0]
       const pg = layout[r.page]
-      if (!el || !pg) return
+      if (!el || !content || !pg) return
+      cancelScrollAnim()
       const y0 = pg.top + r.y0 * pg.scale
       const y1 = pg.top + r.y1 * pg.scale
       const target = Math.min(
@@ -238,26 +252,32 @@ function Reader() {
       const dist = target - from
       const far = Math.abs(dist) > el.clientHeight * 3
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      cancelScrollAnim()
+      programmaticUntil.current = Date.now() + 200
       if (!smooth || far || reduceMotion || Math.abs(dist) < 1) {
-        programmaticUntil.current = Date.now() + 200
         el.scrollTop = target
         return
       }
-      // Animated by hand: the browser's smooth scroll finishes short distances (the usual
-      // paragraph-to-paragraph step) in ~100 ms, which reads as a jump.
+      // Jump to the target, then slide the pages over from where they were. A transform
+      // animation runs on the compositor at the display's refresh rate, unaffected by the
+      // main-thread work during playback (word highlighting, pdf.js drawing pages). The
+      // browser's own smooth scroll finishes short distances in ~100 ms, which reads as a jump.
       const duration = Math.min(900, 350 + Math.sqrt(Math.abs(dist)) * 20)
-      programmaticUntil.current = Date.now() + duration + 200
-      const start = performance.now()
-      const tick = (now: number) => {
-        const k = Math.min(1, (now - start) / duration)
-        const eased = k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2
-        el.scrollTop = from + dist * eased
-        scrollAnim.current = k < 1 ? requestAnimationFrame(tick) : 0
+      animFrom.current = from
+      el.scrollTop = target
+      updateRange()
+      const anim = content.animate([{ transform: `translateY(${dist}px)` }, { transform: 'none' }], {
+        duration,
+        easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+      })
+      scrollAnim.current = anim
+      anim.onfinish = () => {
+        if (scrollAnim.current !== anim) return
+        scrollAnim.current = null
+        animFrom.current = null
+        updateRange()
       }
-      scrollAnim.current = requestAnimationFrame(tick)
     },
-    [layout, cancelScrollAnim],
+    [layout, cancelScrollAnim, updateRange],
   )
 
   useEffect(() => cancelScrollAnim, [cancelScrollAnim])
@@ -557,7 +577,7 @@ function Reader() {
           {pdfError ? (
             <p className="p-8 text-center text-red-400">Could not load PDF: {pdfError}</p>
           ) : (
-            <div className="relative mx-auto" style={{ width, height: totalHeight }}>
+            <div ref={contentRef} className="relative mx-auto" style={{ width, height: totalHeight }}>
               {layout.map((pg, i) => (
                 <PageView
                   key={i}

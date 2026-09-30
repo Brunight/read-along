@@ -8,6 +8,10 @@ services:
     volumes:
       # Each book folder must contain its .sync/ (generated locally by prep/prep.py).
       - ./books:/books:ro
-      # Reading positions (progress.json).
+      # app.sqlite: users, sessions and reading positions.
       - ./data:/data
+    # Optional Google login (see .env.example); without it the app is single-user.
+    env_file:
+      - path: .env
+        required: false
     restart: unless-stopped

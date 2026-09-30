@@ -65,7 +65,7 @@ mkdir -p data
 docker compose up -d --build
 ```
 
-Open `http://server:3000`. Reading positions are saved in `./data/progress.json`, so they follow you across devices.
+Open `http://server:3000`. Reading positions are saved in `./data/app.sqlite`, so they follow you across devices. (An older `data/progress.json` is imported on first start and renamed to `progress.json.imported`.)
 
 To keep the phone's screen on during playback, the page must count as secure. Browsers only allow the screen wake lock on HTTPS or `localhost`. Over plain `http://` on your network, the reader shows a notice and the screen may turn off. You can fix this in either of two ways:
 - **Without HTTPS:** in Chrome on the phone, open `chrome://flags/#unsafely-treat-insecure-origin-as-secure`, enable it, add the app's address (for example `http://192.168.0.100:3000`), and relaunch Chrome.
@@ -75,6 +75,26 @@ To keep the phone's screen on during playback, the page must count as secure. Br
 
 Once the page counts as secure (HTTPS, or the Chrome flag above), open Chrome's menu and choose **Install app** (on some versions, **Add to Home screen**). The app then opens in its own window without the address bar, and starts on the library.
 
+### Sharing with friends (Google login)
+
+Without any setup the app is single-user: everyone who can reach it shares one set of reading positions. To put it on the internet (for example behind a Cloudflare Tunnel) and let only your friends in, turn on Google login:
+
+1. In the [Google Cloud console](https://console.cloud.google.com/apis/credentials), create an OAuth client of type **Web application**. Add `https://<your-host>/api/auth/callback/google` as an authorized redirect URI.
+2. Copy `.env.example` to `.env` next to `docker-compose.yml` and fill it in: the client ID and secret, a `BETTER_AUTH_SECRET` (`openssl rand -base64 32`), and `BETTER_AUTH_URL=https://<your-host>`.
+3. Restart with `docker compose up -d`. While there is no admin, the server prints a one-time link:
+   ```sh
+   docker compose logs app | grep -A1 "No admin yet"
+   ```
+   Open it and sign in with Google. That account becomes the admin, and the reading positions saved before login was turned on move to it.
+
+After that, every page needs a signed-in, approved account. A friend who signs in waits on a "waiting for approval" screen until you approve them on the **Admin** page (avatar menu on the library). There you can also:
+- pre-approve an email, so that account gets in on its first sign-in
+- block or remove people, and make other admins
+- limit which series each person sees
+- see how far each person is in their books
+
+Each person has their own reading positions. Nothing is emailed; Google handles the sign-in.
+
 ### Development
 
 ```sh
@@ -83,7 +103,9 @@ bun install
 bun --bun run dev    # reads ../books, writes ../data
 ```
 
-`BOOKS_DIR`, `DATA_DIR`, and `PORT` can be set through environment variables.
+`BOOKS_DIR`, `DATA_DIR`, and `PORT` can be set through environment variables, and the Google login variables from `.env.example` work the same way in development (use `BETTER_AUTH_URL=http://localhost:3000` and add `http://localhost:3000/api/auth/callback/google` to the OAuth client).
+
+The database is SQLite through Drizzle. After changing `app/src/server/db/schema.ts`, run `bun run db:generate` and commit the new folder under `app/drizzle/`; migrations run on startup. If you change better-auth's options in `app/src/server/auth/options.ts`, run `bun run auth:generate` first to regenerate `app/src/server/db/auth-schema.ts`.
 
 ## Reader controls
 

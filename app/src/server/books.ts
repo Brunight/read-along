@@ -1,6 +1,8 @@
 import { readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 import type { BookSummary, SeriesSummary, SyncData } from '#/lib/types'
+import { canSeeSeries } from './auth/user'
+import type { AppUser } from './auth/user'
 import { imageSize } from './imageSize'
 import { readAllProgress } from './progress'
 
@@ -95,8 +97,18 @@ export async function getBook(series: string, volume: string): Promise<BookFiles
   return scanBook(series, volume)
 }
 
+/** Like getBook, but null for series the user isn't allowed to see. */
+export async function getBookFor(user: AppUser, series: string, volume: string): Promise<BookFiles | null> {
+  return canSeeSeries(user, series) ? getBook(series, volume) : null
+}
+
+/** Every series folder name (for the admin's access picker). */
+export function listSeries(): Promise<string[]> {
+  return listSubdirs(BOOKS_DIR)
+}
+
 /** "mushoku_tensei" → "Mushoku Tensei" */
-function displayName(folder: string): string {
+export function displayName(folder: string): string {
   return folder
     .replace(/[_-]+/g, ' ')
     .trim()
@@ -108,10 +120,11 @@ export async function readSync(book: BookFiles): Promise<SyncData | null> {
   return (await file.exists()) ? ((await file.json()) as SyncData) : null
 }
 
-export async function listBooks(): Promise<SeriesSummary[]> {
-  const progress = await readAllProgress()
+export async function listBooks(user: AppUser): Promise<SeriesSummary[]> {
+  const progress = await readAllProgress(user.id)
   const result: SeriesSummary[] = []
   for (const series of await listSubdirs(BOOKS_DIR)) {
+    if (!canSeeSeries(user, series)) continue
     const volumes: BookSummary[] = []
     for (const volume of await listSubdirs(path.join(BOOKS_DIR, series))) {
       const book = await scanBook(series, volume)
@@ -123,7 +136,7 @@ export async function listBooks(): Promise<SeriesSummary[]> {
   return result
 }
 
-async function summarize(book: BookFiles, time: number | undefined): Promise<BookSummary> {
+export async function summarize(book: BookFiles, time: number | undefined): Promise<BookSummary> {
   const sync = await readSync(book).catch(() => null)
   return {
     id: book.id,

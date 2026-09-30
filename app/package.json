@@ -9,12 +9,18 @@
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "auth:generate": "BETTER_AUTH_SECRET=schema-generation-only auth generate --config auth.cli.ts --output src/server/db/auth-schema.ts --yes",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "1.7.6",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-router": "latest",
     "@tanstack/react-start": "latest",
+    "better-auth": "^1.7.6",
+    "drizzle-orm": "1.0.0-rc.4",
     "nitro": "3.0.260610-beta",
     "pdfjs-dist": "^6.3.289",
     "react": "^19.2.0",
@@ -28,6 +34,8 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "auth": "1.7.6",
+    "drizzle-kit": "1.0.0-rc.4",
     "typescript": "^6.0.2",
     "vite": "^8.0.0"
   },

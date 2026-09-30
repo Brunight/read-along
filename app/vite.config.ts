@@ -22,5 +22,5 @@ const apiFetchDestFix: Plugin = {
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
-  plugins: [apiFetchDestFix, nitro({ preset: 'bun' }), tailwindcss(), tanstackStart(), viteReact()],
+  plugins: [apiFetchDestFix, nitro({ preset: 'bun', plugins: ['./src/server/nitro/startup.ts'] }), tailwindcss(), tanstackStart(), viteReact()],
 })

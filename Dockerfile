@@ -11,6 +11,8 @@ RUN bun run build
 FROM oven/bun:1-slim
 WORKDIR /app
 COPY --from=build /app/.output ./.output
+# Database migrations, applied on startup.
+COPY --from=build /app/drizzle ./drizzle
 ENV NODE_ENV=production \
     BOOKS_DIR=/books \
     DATA_DIR=/data \

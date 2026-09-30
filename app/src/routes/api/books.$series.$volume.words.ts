@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getBook } from '#/server/books'
+import { approvedUser, unauthorized } from '#/server/auth/user'
+import { getBookFor } from '#/server/books'
 
 // words.json is ~2.5 MB of JSON (~0.7 MB gzipped); compress once per file version.
 const cache = new Map<string, { mtime: number; gz: Uint8Array<ArrayBuffer> }>()
@@ -8,7 +9,9 @@ export const Route = createFileRoute('/api/books/$series/$volume/words')({
   server: {
     handlers: {
       GET: async ({ request, params }) => {
-        const book = await getBook(params.series, params.volume)
+        const user = await approvedUser()
+        if (!user) return unauthorized()
+        const book = await getBookFor(user, params.series, params.volume)
         const file = book && Bun.file(book.words)
         if (!file || !(await file.exists())) return new Response('Not found', { status: 404 })
         const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'private, max-age=3600', Vary: 'Accept-Encoding' }

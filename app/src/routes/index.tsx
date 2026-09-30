@@ -1,21 +1,28 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { SettingsLink } from '#/components/SettingsLink'
+import { UserMenu } from '#/components/UserMenu'
 import { formatDuration } from '#/lib/format'
 import type { BookSummary } from '#/lib/types'
-import { fetchBooks } from '#/server/fns'
+import { fetchBooks, fetchMe } from '#/server/fns'
 
 export const Route = createFileRoute('/')({
-  loader: () => fetchBooks(),
+  loader: async () => {
+    const [series, me] = await Promise.all([fetchBooks(), fetchMe()])
+    return { series, me }
+  },
   component: Library,
 })
 
 function Library() {
-  const series = Route.useLoaderData()
+  const { series, me } = Route.useLoaderData()
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
-        <SettingsLink />
+        <div className="flex items-center gap-2">
+          <SettingsLink />
+          <UserMenu me={me} />
+        </div>
       </div>
       {series.length === 0 ? (
         <p className="mt-6 text-zinc-400">

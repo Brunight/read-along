@@ -10,7 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PendingRouteImport } from './routes/pending'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SetupRouteImport } from './routes/setup'
+import { Route as SetupClaimRouteImport } from './routes/setup_.claim'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as BooksSeriesVolumeRouteImport } from './routes/books.$series.$volume'
 import { Route as ApiProgressSeriesVolumeRouteImport } from './routes/api/progress.$series.$volume'
 import { Route as ApiBooksSeriesVolumeAudioRouteImport } from './routes/api/books.$series.$volume.audio'
@@ -23,9 +29,39 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PendingRoute = PendingRouteImport.update({
+  id: '/pending',
+  path: '/pending',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupClaimRoute = SetupClaimRouteImport.update({
+  id: '/setup_/claim',
+  path: '/setup/claim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BooksSeriesVolumeRoute = BooksSeriesVolumeRouteImport.update({
@@ -64,7 +100,13 @@ const ApiBooksSeriesVolumeWordsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/login': typeof LoginRoute
+  '/pending': typeof PendingRoute
   '/settings': typeof SettingsRoute
+  '/setup': typeof SetupRoute
+  '/setup/claim': typeof SetupClaimRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/books/$series/$volume': typeof BooksSeriesVolumeRoute
   '/api/progress/$series/$volume': typeof ApiProgressSeriesVolumeRoute
   '/api/books/$series/$volume/audio': typeof ApiBooksSeriesVolumeAudioRoute
@@ -74,7 +116,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/login': typeof LoginRoute
+  '/pending': typeof PendingRoute
   '/settings': typeof SettingsRoute
+  '/setup': typeof SetupRoute
+  '/setup/claim': typeof SetupClaimRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/books/$series/$volume': typeof BooksSeriesVolumeRoute
   '/api/progress/$series/$volume': typeof ApiProgressSeriesVolumeRoute
   '/api/books/$series/$volume/audio': typeof ApiBooksSeriesVolumeAudioRoute
@@ -85,7 +133,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/login': typeof LoginRoute
+  '/pending': typeof PendingRoute
   '/settings': typeof SettingsRoute
+  '/setup': typeof SetupRoute
+  '/setup_/claim': typeof SetupClaimRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/books/$series/$volume': typeof BooksSeriesVolumeRoute
   '/api/progress/$series/$volume': typeof ApiProgressSeriesVolumeRoute
   '/api/books/$series/$volume/audio': typeof ApiBooksSeriesVolumeAudioRoute
@@ -97,7 +151,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
+    | '/login'
+    | '/pending'
     | '/settings'
+    | '/setup'
+    | '/setup/claim'
+    | '/api/auth/$'
     | '/books/$series/$volume'
     | '/api/progress/$series/$volume'
     | '/api/books/$series/$volume/audio'
@@ -107,7 +167,13 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
+    | '/login'
+    | '/pending'
     | '/settings'
+    | '/setup'
+    | '/setup/claim'
+    | '/api/auth/$'
     | '/books/$series/$volume'
     | '/api/progress/$series/$volume'
     | '/api/books/$series/$volume/audio'
@@ -117,7 +183,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
+    | '/login'
+    | '/pending'
     | '/settings'
+    | '/setup'
+    | '/setup_/claim'
+    | '/api/auth/$'
     | '/books/$series/$volume'
     | '/api/progress/$series/$volume'
     | '/api/books/$series/$volume/audio'
@@ -128,7 +200,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  LoginRoute: typeof LoginRoute
+  PendingRoute: typeof PendingRoute
   SettingsRoute: typeof SettingsRoute
+  SetupRoute: typeof SetupRoute
+  SetupClaimRoute: typeof SetupClaimRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   BooksSeriesVolumeRoute: typeof BooksSeriesVolumeRoute
   ApiProgressSeriesVolumeRoute: typeof ApiProgressSeriesVolumeRoute
   ApiBooksSeriesVolumeAudioRoute: typeof ApiBooksSeriesVolumeAudioRoute
@@ -146,11 +224,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pending': {
+      id: '/pending'
+      path: '/pending'
+      fullPath: '/pending'
+      preLoaderRoute: typeof PendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup_/claim': {
+      id: '/setup_/claim'
+      path: '/setup/claim'
+      fullPath: '/setup/claim'
+      preLoaderRoute: typeof SetupClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/books/$series/$volume': {
@@ -200,7 +320,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  LoginRoute: LoginRoute,
+  PendingRoute: PendingRoute,
   SettingsRoute: SettingsRoute,
+  SetupRoute: SetupRoute,
+  SetupClaimRoute: SetupClaimRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
   BooksSeriesVolumeRoute: BooksSeriesVolumeRoute,
   ApiProgressSeriesVolumeRoute: ApiProgressSeriesVolumeRoute,
   ApiBooksSeriesVolumeAudioRoute: ApiBooksSeriesVolumeAudioRoute,
@@ -213,10 +339,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

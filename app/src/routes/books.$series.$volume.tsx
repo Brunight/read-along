@@ -86,21 +86,22 @@ async function exitReadingFullscreen() {
 
 function Reader() {
   const { series, volume } = Route.useParams()
+  const { sync, progress: serverProgress, storageUser } = Route.useLoaderData()
   // Key for saved progress (matches the server's "<series>/<volume>" book id).
   const bookId = `${series}/${volume}`
-  const { sync, progress: serverProgress } = Route.useLoaderData()
+  const progressKey = storageUser ? `progress:${storageUser}:${bookId}` : `progress:${bookId}`
   const { paragraphs, chapters, pages } = sync
   const bookPath = `${encodeURIComponent(series)}/${encodeURIComponent(volume)}`
   const api = `/api/books/${bookPath}`
   const { doc, error: pdfError } = usePdfDocument(`${api}/pdf`)
 
   const initialTime = useMemo(() => {
-    const local = load<Progress | null>(`progress:${bookId}`, null)
+    const local = load<Progress | null>(progressKey, null)
     const best = [local, serverProgress]
       .filter((p): p is Progress => p != null)
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]
     return best?.time ?? 0
-  }, [bookId, serverProgress])
+  }, [progressKey, serverProgress])
 
   const audioRef = useRef<HTMLAudioElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -343,18 +344,21 @@ function Reader() {
       const t = Math.round(audio.currentTime * 10) / 10
       if (t === lastSaved.current) return
       lastSaved.current = t
-      store(`progress:${bookId}`, { time: t, updatedAt: new Date().toISOString() })
+      store(progressKey, { time: t, updatedAt: new Date().toISOString() })
       const url = `/api/progress/${bookPath}`
       const body = JSON.stringify({ time: t })
       if (beacon && navigator.sendBeacon) {
         navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }))
       } else {
-        fetch(url, { method: 'PUT', body, headers: { 'Content-Type': 'application/json' }, keepalive: true }).catch(
-          () => {},
-        )
+        fetch(url, { method: 'PUT', body, headers: { 'Content-Type': 'application/json' }, keepalive: true })
+          .then((res) => {
+            // Signed out or access revoked: saving would keep failing silently.
+            if (res.status === 401) window.location.href = '/login'
+          })
+          .catch(() => {})
       }
     },
-    [bookId, bookPath],
+    [progressKey, bookPath],
   )
 
   useEffect(() => {

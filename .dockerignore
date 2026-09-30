@@ -6,3 +6,4 @@ app/.output
 app/.nitro
 app/.tanstack
 **/.DS_Store
+**/.env

@@ -63,7 +63,7 @@ export const fetchAdminData = createServerFn({ method: 'GET' }).handler(async ()
     users: await Promise.all(
       users.map(async (u) => ({
         id: u.id,
-        name: u.name,
+        name: u.nickname || u.name,
         email: u.email,
         image: u.image,
         isAdmin: u.role === 'admin',

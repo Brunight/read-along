@@ -14,6 +14,8 @@ export const schemaOptions = {
       status: { type: 'string' as const, required: true, defaultValue: 'pending', input: false },
       /** false: only the series listed in user_series are visible. */
       allSeries: { type: 'boolean' as const, required: true, defaultValue: true, input: false },
+      /** Name the user picked in Settings; shown instead of `name`, which Google overwrites on sign-in. */
+      nickname: { type: 'string' as const, required: false, input: false },
     },
   },
   plugins: [adminPlugin],

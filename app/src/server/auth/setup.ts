@@ -39,7 +39,12 @@ export function claimFirstAdmin(userId: string, token: string): boolean {
     if (expected.length !== given.length || !timingSafeEqual(expected, given)) return false
     if (tx.select({ id: user.id }).from(user).where(eq(user.role, 'admin')).limit(1).get()) return false
 
-    tx.update(user).set({ role: 'admin', status: 'approved' }).where(eq(user.id, userId)).run()
+    // A name picked while single-user carries over.
+    const local = tx.select({ nickname: user.nickname }).from(user).where(eq(user.id, LOCAL_USER_ID)).get()
+    tx.update(user)
+      .set({ role: 'admin', status: 'approved', ...(local?.nickname && { nickname: local.nickname }) })
+      .where(eq(user.id, userId))
+      .run()
 
     // Move "You"'s positions over, keeping whichever of the two is more recent per book.
     const mine = new Map(

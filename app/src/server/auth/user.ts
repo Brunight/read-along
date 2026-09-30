@@ -7,7 +7,12 @@ import { auth } from './auth'
 
 export interface AppUser {
   id: string
+  /** Display name: the nickname if set, else the account's own name. */
   name: string
+  /** Picked by the user in Settings; null means "use the account name". */
+  nickname: string | null
+  /** From Google ("You" for the local user). */
+  accountName: string
   email: string
   image: string | null
   isAdmin: boolean
@@ -50,13 +55,23 @@ async function resolveUser(request: Request): Promise<AppUser | null> {
 }
 
 function toAppUser(
-  u: { id: string; name: string; email: string; image?: string | null; status: string; banned?: boolean | null },
+  u: {
+    id: string
+    name: string
+    nickname?: string | null
+    email: string
+    image?: string | null
+    status: string
+    banned?: boolean | null
+  },
   series: AppUser['series'],
   isAdmin: boolean,
 ): AppUser {
   return {
     id: u.id,
-    name: u.name,
+    name: u.nickname || u.name,
+    nickname: u.nickname ?? null,
+    accountName: u.name,
     email: u.email,
     image: u.image ?? null,
     isAdmin,

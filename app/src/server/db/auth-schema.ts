@@ -22,6 +22,7 @@ export const user = sqliteTable("user", {
   banExpires: integer("ban_expires", { mode: "timestamp_ms" }),
   status: text("status").default("pending").notNull(),
   allSeries: integer("all_series", { mode: "boolean" }).default(true).notNull(),
+  nickname: text("nickname"),
 });
 
 export const session = sqliteTable(

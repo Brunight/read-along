@@ -1,4 +1,5 @@
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
+import { useState } from 'react'
 import { GutterBar } from '#/components/PdfViewer'
 import {
   DEFAULT_SETTINGS,
@@ -11,10 +12,13 @@ import {
   wordStyle,
 } from '#/lib/settings'
 import type { HighlightColor, HighlightMode, HighlightStyle, Settings } from '#/lib/settings'
+import { MAX_NAME_LENGTH, cleanName, fetchMe, setMyName } from '#/server/fns'
+import type { Me } from '#/server/fns'
 
 export const Route = createFileRoute('/settings')({
   // Settings live in localStorage; render on the client only.
   ssr: false,
+  loader: () => fetchMe(),
   head: () => ({ meta: [{ title: 'Settings · Read Along' }] }),
   component: SettingsPage,
 })
@@ -67,6 +71,8 @@ function SettingsPage() {
       </header>
 
       <main className="mx-auto max-w-2xl space-y-8 px-4 py-6 sm:py-10">
+        <NameSection me={Route.useLoaderData()} />
+
         <section>
           <h2 className="text-base font-semibold">Highlight</h2>
           <p className="mt-1 text-sm text-zinc-400">What follows the narration. Saved on this device.</p>
@@ -148,6 +154,62 @@ function SettingsPage() {
         </button>
       </main>
     </div>
+  )
+}
+
+function NameSection({ me }: { me: Me }) {
+  const router = useRouter()
+  const user = me.user
+  const [name, setName] = useState(user?.nickname ?? '')
+  const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  if (!user) return null
+  const changed = cleanName(name) !== (user.nickname ?? '')
+
+  return (
+    <section>
+      <h2 className="text-base font-semibold">Your name</h2>
+      <p className="mt-1 text-sm text-zinc-400">
+        {me.authEnabled
+          ? `Shown in the menu and to admins. Leave empty to use your Google name (${user.accountName}).`
+          : 'Leave empty for “You”. If Google login is turned on later, it carries over to the first admin.'}
+      </p>
+      <form
+        className="mt-4 flex gap-2"
+        onSubmit={async (e) => {
+          e.preventDefault()
+          setState('saving')
+          try {
+            await setMyName({ data: { name } })
+            setName(cleanName(name))
+            await router.invalidate()
+            setState('saved')
+          } catch {
+            setState('error')
+          }
+        }}
+      >
+        <input
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value)
+            setState('idle')
+          }}
+          maxLength={MAX_NAME_LENGTH}
+          placeholder={user.accountName}
+          aria-label="Your name"
+          className="min-w-0 flex-1 rounded-lg bg-white/5 px-3 py-2 text-sm ring-1 ring-white/10 placeholder:text-zinc-600 focus:ring-amber-400/60 focus:outline-none"
+        />
+        <button
+          type="submit"
+          disabled={!changed || state === 'saving'}
+          className="rounded-lg bg-amber-400 px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-amber-300 disabled:opacity-40"
+        >
+          {state === 'saving' ? 'Saving…' : 'Save'}
+        </button>
+      </form>
+      {state === 'saved' && <p className="mt-2 text-xs text-zinc-500">Saved.</p>}
+      {state === 'error' && <p className="mt-2 text-xs text-rose-300">Couldn’t save. Try again.</p>}
+    </section>
   )
 }
 

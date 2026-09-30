@@ -4,7 +4,8 @@ services:
     image: read-along
     container_name: read-along-app
     ports:
-      - "3000:3000"
+      # Host port; set APP_PORT in .env to change it.
+      - "${APP_PORT:-3000}:3000"
     volumes:
       # Each book folder must contain its .sync/ (generated locally by prep/prep.py).
       - ./books:/books:ro

@@ -65,7 +65,7 @@ mkdir -p data
 docker compose up -d --build
 ```
 
-Open `http://server:3000`. Reading positions are saved in `./data/app.sqlite`, so they follow you across devices. (An older `data/progress.json` is imported on first start and renamed to `progress.json.imported`.)
+Open `http://server:3000`. To publish on another port, set `APP_PORT` in a `.env` file next to `docker-compose.yml` (see `.env.example`). Reading positions are saved in `./data/app.sqlite`, so they follow you across devices. (An older `data/progress.json` is imported on first start and renamed to `progress.json.imported`.)
 
 To keep the phone's screen on during playback, the page must count as secure. Browsers only allow the screen wake lock on HTTPS or `localhost`. Over plain `http://` on your network, the reader shows a notice and the screen may turn off. You can fix this in either of two ways:
 - **Without HTTPS:** in Chrome on the phone, open `chrome://flags/#unsafely-treat-insecure-origin-as-secure`, enable it, add the app's address (for example `http://192.168.0.100:3000`), and relaunch Chrome.

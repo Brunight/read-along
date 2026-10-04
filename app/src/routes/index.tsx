@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { GitHubLink } from '#/components/GitHubLink'
 import { SettingsLink } from '#/components/SettingsLink'
 import { UserMenu } from '#/components/UserMenu'
 import { formatDuration } from '#/lib/format'
@@ -20,6 +21,7 @@ function Library() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
         <div className="flex items-center gap-2">
+          <GitHubLink />
           <SettingsLink />
           <UserMenu me={me} />
         </div>

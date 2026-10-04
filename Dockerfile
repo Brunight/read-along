@@ -1,4 +1,4 @@
-# Read-along web app. Serves pre-processed books; no Python/GPU needed here.
+# Reader Sensei web app. Serves pre-processed books; no Python/GPU needed here.
 # The books/ folder (with each book's .sync/ produced by prep/prep.py) is mounted at /books.
 
 FROM oven/bun:1 AS build

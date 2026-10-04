@@ -12,7 +12,7 @@ export const Route = createFileRoute('/setup')({
     const me = await fetchMe()
     if (!me.authEnabled) throw redirect({ to: '/' })
   },
-  head: () => ({ meta: [{ title: 'Set up · Read Along' }] }),
+  head: () => ({ meta: [{ title: 'Set up · Reader Sensei' }] }),
   component: Setup,
 })
 

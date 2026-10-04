@@ -10,7 +10,7 @@ export const Route = createRootRoute({
       { name: 'apple-mobile-web-app-capable', content: 'yes' },
       { name: 'mobile-web-app-capable', content: 'yes' },
       { name: 'apple-mobile-web-app-status-bar-style', content: 'black' },
-      { title: 'Read Along' },
+      { title: 'Reader Sensei' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },

@@ -1,4 +1,4 @@
-"""Prepare every book in the books folder for the read-along app.
+"""Prepare every book in the books folder for the Reader Sensei app.
 
 For each books/<series>/<volume>/ with a *.pdf and audio/*.m4b, writes <volume>/.sync/:
   paragraphs.json  PDF paragraphs with page rects

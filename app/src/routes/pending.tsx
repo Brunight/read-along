@@ -10,7 +10,7 @@ export const Route = createFileRoute('/pending')({
     if (!me.user) throw redirect({ to: '/login' })
     return { me: me.user }
   },
-  head: () => ({ meta: [{ title: 'Waiting for approval · Read Along' }] }),
+  head: () => ({ meta: [{ title: 'Waiting for approval · Reader Sensei' }] }),
   component: Pending,
 })
 

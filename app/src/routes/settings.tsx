@@ -19,7 +19,7 @@ export const Route = createFileRoute('/settings')({
   // Settings live in localStorage; render on the client only.
   ssr: false,
   loader: () => fetchMe(),
-  head: () => ({ meta: [{ title: 'Settings · Read Along' }] }),
+  head: () => ({ meta: [{ title: 'Settings · Reader Sensei' }] }),
   component: SettingsPage,
 })
 

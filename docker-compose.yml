@@ -1,8 +1,8 @@
 services:
   app:
     build: .
-    image: read-along
-    container_name: read-along-app
+    image: reader-sensei
+    container_name: reader-sensei-app
     ports:
       # Host port; set APP_PORT in .env to change it.
       - "${APP_PORT:-3000}:3000"

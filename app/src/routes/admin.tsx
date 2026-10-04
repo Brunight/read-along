@@ -20,7 +20,7 @@ export const Route = createFileRoute('/admin')({
     if (!me.authEnabled || !me.user?.isAdmin) throw redirect({ to: '/' })
   },
   loader: () => fetchAdminData(),
-  head: () => ({ meta: [{ title: 'Admin · Read Along' }] }),
+  head: () => ({ meta: [{ title: 'Admin · Reader Sensei' }] }),
   component: AdminPage,
 })
 

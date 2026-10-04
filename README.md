@@ -1,4 +1,4 @@
-# Read Along
+# Reader Sensei
 
 Read a PDF book while its audiobook plays: the original PDF pages scroll by themselves and the paragraph being narrated is highlighted.
 
@@ -58,7 +58,7 @@ How it works:
 
 ```sh
 # copy the prepared books (including the hidden .sync folders) to the server
-rsync -av books/ server:/path/to/read-along/books/
+rsync -av books/ server:/path/to/reader-sensei/books/
 
 # on the server, in the repo folder
 mkdir -p data

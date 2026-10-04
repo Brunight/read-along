@@ -1,6 +1,6 @@
 {
-  "name": "Read Along",
-  "short_name": "Read Along",
+  "name": "Reader Sensei",
+  "short_name": "Reader Sensei",
   "description": "Read PDF books while their audiobooks play, synced by paragraph.",
   "start_url": "/",
   "scope": "/",
